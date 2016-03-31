@@ -16,8 +16,8 @@ void parents(double **ID, double **OFF, double **Rmof, int *O, int Nloci, int In
     int k, int l, int Clu, int Liv, int gener, double Beta1, double alpha,
     double *RES, int rep, int loadstart, int load, int Active, int prP, int Neutstart,
     int Neutral, int Kind, int M, int poe, int epe, double poadj, double epadj, 
-    double mu, double mumu, double musd, int conSt, int EpAvail, int pid, int msel,
-    int lastgen, int EpRestr, double Pcost, int condk){
+    double mu, double mumu, double musd, int conSt, int PostSel, int pid, int msel,
+    int lastgen, int EpRestr, double Pcost, int condk, int PreSel){
 
     int i, j, g, h, m, s, MomP, DadP, extra, nmale, ch, PrCount, ccc, socmat;
     int *MALES;
@@ -31,7 +31,7 @@ void parents(double **ID, double **OFF, double **Rmof, int *O, int Nloci, int In
     h     = 0;
     extra = 0; /* Check to see if we need to find a new extra pair mate for nest */
     MAKE_1ARRAY(MALES,2); /* Just so to not free something that doesn't exist */
-    MAKE_1ARRAY(Mse,2); /* Same as above, will only use if EpAvail > 0 */
+    MAKE_1ARRAY(Mse,2); /* Same as above, will only use if PostCsel > 0 */
     for(i=0; i<l; i++){
         if(i==O[h]){   /* If offspring # hits count of off nest*/    
             h++;       /* Move to the next nest */
@@ -68,10 +68,7 @@ void parents(double **ID, double **OFF, double **Rmof, int *O, int Nloci, int In
             if(nmale > k){ /* If females more polyandrous than there are males */
                 nmale = k; /* Cap the polyandry at the number of paired males */
             } /* Now males cannot be selected additionally as extra-pair mates */
-            if(EpAvail > 0 && (EpAvail+1) < nmale){ /* If random subset */
-                nmale = EpAvail; /* But would be more polyandrous than subset size */
-            } /* Must truncate polyandry so female can't take more males than subset */
-            if(EpAvail <= 0 && EpRestr > 0 && (EpRestr+1) < nmale){ /* If subset restricted */
+            if(EpRestr > 0 && (EpRestr+1) < nmale){ /* If subset restricted */
                 nmale = EpRestr; /* But would be more polyandrous than the restriction */
             } /* Must truncate polyandry so females can't take more than restriction */
             if(gPy <= 0.0 && nmale != 1){
@@ -97,7 +94,7 @@ void parents(double **ID, double **OFF, double **Rmof, int *O, int Nloci, int In
                 /* ----- Everything below checks out new mates -----------------  */
                 for(j=s; j<Liv; j++){ /* Check out each of opposite sex available */
                     if(ID[j][4]>-1 && ID[j][4]<=M && ID[j][2] >= 0 && ID[j][3] >= 0){
-                        if(EpAvail > 0){ /* If EpAvail is positive, using a subset */
+                        if(PreSel == 0){ /* If no precop selection, using a subset */
                             PrM[j] = 1; /* And the subset should be random */
                         }else{ /* Else we choose nmales based on genotype */
                             if(Kind == 1){ /* If complete kin recognition */
@@ -130,7 +127,7 @@ void parents(double **ID, double **OFF, double **Rmof, int *O, int Nloci, int In
                         } /* Quality now increased (new) or decreased (1/new) with kinship */
                     } /* Like in mateselect, now move to actual selection from prob */
                 } /* Below: If not using a subset, but want to restrict access to males */
-                if(EpAvail <= 0 && EpRestr > 0){  /* Choice will be within restriction */
+                if(EpRestr > 0){  /* Choice will be within restriction */
                     ccc     = 100000; /* Just make sure there's no infinite loop */
                     PrCount = 0; /* This will count possible mates (to be restricted) */
                     for(j=0; j<Liv; j++){ /* Go through all of the individuals */
@@ -180,7 +177,7 @@ void parents(double **ID, double **OFF, double **Rmof, int *O, int Nloci, int In
                 FREE_1ARRAY(PrM); /* Note: If EpAvail > 0, MALES is a random subset */
                 FREE_1ARRAY(PrT); /* Selection within non-random if EpAvail>0 (see below */
                 /* If EpAvail > 0, EP males are random, selection occurs within subset */
-                if(EpAvail > 0){ /* If true, males will be social + random set */
+                if(PostSel > 0){ /* If true, postcop selection will occur */
                     MAKE_1ARRAY(PrM,nmale); /* Use now for within the subset */
                     FREE_1ARRAY(Mse); /* Should always be one to free */
                     MAKE_1ARRAY(Mse,nmale); /* Cumulative prob for sampling */
@@ -257,7 +254,7 @@ void parents(double **ID, double **OFF, double **Rmof, int *O, int Nloci, int In
         if(nmale==1){ /* If there is no extra-pair paternity, m just social male */
             m  = ID[h][8];
         }else{ /* Else, check if we are operating with EpAvail */
-            if(EpAvail > 0){ /* If so, choose within subset based on quality */
+            if(PostSel > 0){ /* If so, choose within subset based on quality */
                PrC = randunif(); /* Vector prob select*/
                ch  = 0; /* j increases to find position selected */
                while(Mse[ch] < PrC){

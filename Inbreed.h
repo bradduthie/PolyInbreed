@@ -22,7 +22,7 @@
 
 void Inbreed(int mc, int M, int Imm, int Clu, double *RES, double Beta1, int rep,
     int Active, int Neutral, int load, double alpha, int gen, int muSt, double mu, 
-    int Kind, int xlen, int mNalleles, int sdNalleles, int prP, double ImmSD,
-    int wpe, int poe, int epe, double poadj, double epadj, double wpadj,
-    double Scost, double Pcost, double Ecost, int conSt, int snap, int EpAvail,
-    int msel, int EpRestr, int WpRestr, int condk);
+    int Kind, int xlen, int prP, double ImmSD, int wpe, int poe, int epe, 
+    double poadj, double epadj, double wpadj, double Scost, double Pcost, 
+    double Ecost, int conSt, int snap, int PostSel, int msel, int EpRestr, 
+    int WpRestr, int condk, int PreSel);

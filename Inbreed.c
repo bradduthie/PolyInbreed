@@ -31,10 +31,10 @@
 
 void Inbreed(int mc, int M, int Imm, int Clu, double *RES, double Beta1, int rep,
     int Active, int Neutral, int load, double alpha, int gen, int muSt, double mu, 
-    int Kind, int xlen, int mNalleles, int sdNalleles, int prP, double ImmSD,
-    int wpe, int poe, int epe, double poadj, double epadj, double wpadj,
-    double Scost, double Pcost, double Ecost, int conSt, int snap, int EpAvail,
-    int msel, int EpRestr, int WpRestr, int condk){
+    int Kind, int xlen, int prP, double ImmSD, int wpe, int poe, int epe, 
+    double poadj, double epadj, double wpadj, double Scost, double Pcost, 
+    double Ecost, int conSt, int snap, int PostSel, int msel, int EpRestr, 
+    int WpRestr, int condk, int PreSel){
 
     /* =========================================================================*/
     /* =========================================================================*/
@@ -105,7 +105,7 @@ void Inbreed(int mc, int M, int Imm, int Clu, double *RES, double Beta1, int rep
     MAKE_1ARRAY(alleles, Nloci); /* Make a vector for alleles per loci */
     a = 0;                       /* Use 'a' here to check allele count is > 0. */
     for(i=0; i<Nloci; i++){      /* Loop assigns allele number to loci (def = 2) */
-        a = randnormINT(mNalleles, sdNalleles);
+        a = randnormINT(2, 0);
         if(a < 1){ /* Need at least one allele per loci */
             a = 1;
         }
@@ -225,7 +225,6 @@ void Inbreed(int mc, int M, int Imm, int Clu, double *RES, double Beta1, int rep
 
     i = 0;
     while(i < gen){
-
         /* ==========================================================*/
         /* See if population size is below extinction threshold      */
         /* ==========================================================*/    
@@ -425,7 +424,7 @@ void Inbreed(int mc, int M, int Imm, int Clu, double *RES, double Beta1, int rep
 
         parents(ID,OFF,Rmof,O,Nloci,Ind,k,l,Clu,Liv,i,Beta1,alpha,RES,rep,loadstart,
             load,Active,prP,Neutstart,Neutral,Kind,M,poe,epe,poadj,epadj,mu,
-            mumu,musd,conSt,EpAvail,pid,msel,gen,EpRestr,Pcost,condk);
+            mumu,musd,conSt,PostSel,pid,msel,gen,EpRestr,Pcost,condk,PreSel);
         Ind += l; /*Needed because the Ind++ in parents wont link here */
 
         /* ==========================================================*/
@@ -609,7 +608,6 @@ void Inbreed(int mc, int M, int Imm, int Clu, double *RES, double Beta1, int rep
         }        
         FREE_2ARRAY(PIV); /* Then free PIV  */
 
-
         /* ==========================================================*/
         /* Now we need to make a new R matrix... ====================*/
         /* ==========================================================*/        
@@ -627,7 +625,6 @@ void Inbreed(int mc, int M, int Imm, int Clu, double *RES, double Beta1, int rep
         FREE_2ARRAY(Rmof);
         FREE_1ARRAY(O);
 
-
         /* ==========================================================*/
         /* Prints generation info in terminal    ====================*/
         /* ==========================================================*/
@@ -635,13 +632,11 @@ void Inbreed(int mc, int M, int Imm, int Clu, double *RES, double Beta1, int rep
         printf("%d\t%f\t%f\t%d\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n",pid,Beta1,Pcost,i,
             RES[0],RES[1],RES[2],RES[3],RES[4],RES[5],RES[6]);
 
-
         /* ==========================================================*/
         /* Move ahead to the next generation                         */
         /* ==========================================================*/        
 
         i++; /* Now have fresh Rmat and ID arrays to start the next generation */
-
     }
 
     FREE_2ARRAY(REGR);
