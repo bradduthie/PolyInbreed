@@ -16,7 +16,7 @@
 
 int main(void){
 
-    int    mc, M, Imm, Clu, rep, i, j, k, xlen, Pedi, prP, conSt, snap, msel, condk;
+    int    mc, M, Imm, Clu, rep, i, j, xlen, Pedi, prP, conSt, snap, msel, condk;
     int    Active, Neutral, load, gen, muSt, Kind, EpRestr, WpRestr, PreSel, PostSel;
     double Beta1, alpha, mu, *RES, ImmSD, poadj, epadj, wpadj, Scost, Pcost, Ecost;
     double poe, wpe, epe;
@@ -75,7 +75,6 @@ int main(void){
     srand(time(NULL) ^ (getpid()<<16)); /* Use time to generate random seed */
 
     i    = 0; /* Loops through different replicate simulations */
-    k    = 0; /* Use for the switch in Beta */
     prP  = 0; /* Indicator for actually printing the pedigree */
     while(i < rep){
         if(i == rep-1 && Pedi == 1){ /* If it's the last rep, and should print pedigree */
