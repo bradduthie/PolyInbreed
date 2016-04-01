@@ -17,7 +17,7 @@ void parents(double **ID, double **OFF, double **Rmof, int *O, int Nloci, int In
     double *RES, int rep, int loadstart, int load, int Active, int prP, int Neutstart,
     int Neutral, int Kind, int M, int poe, int epe, double poadj, double epadj, 
     double mu, double mumu, double musd, int conSt, int PostSel, int pid, int msel,
-    int lastgen, int EpRestr, double Pcost, int condk, int PreSel){
+    int lastgen, int EpRestr, double Pcost, int condk, int PreSel, int wpVsep){
 
     int i, j, g, h, m, s, MomP, DadP, extra, nmale, ch, PrCount, ccc, socmat;
     int *MALES;
@@ -107,7 +107,7 @@ void parents(double **ID, double **OFF, double **Rmof, int *O, int Nloci, int In
                                 }
                             }
                             new = 0; /* Start with zero, but default will be one (below) */
-                            if(conSt == 0){
+                            if(conSt == 0 && wpVsep == 0){
                                 for(g=0; g<load; g++){ /* Strategy alleles for qual */
                                     new += (r*alpha*ID[h][((4*g)+loadstart)]*epe)+(r*epadj); 
                                     new += (r*alpha*ID[h][((4*g)+loadstart+1)]*epe)+(r*epadj); 
@@ -193,7 +193,7 @@ void parents(double **ID, double **OFF, double **Rmof, int *O, int Nloci, int In
                             }
                         } /* Note that g is being recycled below, no longer position */
                         new = 0; /* Start with zero, but default will be one (below) */
-                        if(conSt == 0){
+                        if(conSt == 0 && wpVsep == 1){
                             for(g=0; g<load; g++){ /* Strategy alleles for qual */
                                 new += (r*alpha*ID[h][((4*g)+loadstart)]*epe)+(r*epadj); 
                                 new += (r*alpha*ID[h][((4*g)+loadstart+1)]*epe)+(r*epadj); 

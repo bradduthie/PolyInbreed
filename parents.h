@@ -10,4 +10,4 @@ void parents(double **ID, double **OFF, double **Rmof, int *O, int Nloci, int In
     double *RES, int rep, int loadstart, int load, int Active, int prP, int Neutstart,
     int Neutral, int Kind, int M, int poe, int epe, double poadj, double epadj,
     double mu, double mumu, double musd, int conSt, int PostSel, int pid, int msel,
-    int lastgen, int EpRestr, double Pcost, int condk, int PreSel);
+    int lastgen, int EpRestr, double Pcost, int condk, int PreSel, int wpVsep);

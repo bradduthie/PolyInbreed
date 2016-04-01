@@ -16,7 +16,7 @@
 
 int main(void){
 
-    int    mc, M, Imm, Clu, rep, i, j, xlen, Pedi, prP, conSt, snap, msel, condk;
+    int    mc, M, Imm, Clu, rep, i, j, xlen, Pedi, prP, conSt, snap, msel, condk, wpVsep;
     int    Active, Neutral, load, gen, muSt, Kind, EpRestr, WpRestr, PreSel, PostSel;
     double Beta1, alpha, mu, *RES, ImmSD, poadj, epadj, wpadj, Scost, Pcost, Ecost;
     double poe, wpe, epe;
@@ -42,6 +42,7 @@ int main(void){
     xlen    = 10;     /* Spatial x and y dimension -- carrying capacity = xlen*xlen       */
     ImmSD   = 1.0;    /* SD around the mean for immigrant allelic values                  */
     conSt   = 1;      /* Constrain WP & EP avoidance/preference to be equal? (0:no, 1:yes)*/
+    wpVsep  = 0;      /* 0: wpe is soc, epe is poly mates | 1: wpe is pre, epe is postcop */ 
     condk   = 0;      /* Is gPy scaled by the kinship of the initial mate (1:yes)         */
     EpRestr = 0;      /* Restrict additional mate acces? (0: no, >0: Restriction number   */
     WpRestr = 0;      /* Restrict mate access for WP mates? (0: no, >0: Restriction #     */
@@ -88,7 +89,7 @@ int main(void){
         /* The function below is the main simulation function from Inbreed.c */
         Inbreed(mc,M,Imm,Clu,RES,Beta1,i,Active,Neutral,load,alpha,gen,muSt,mu,Kind,xlen,
             prP,ImmSD,wpe,poe,epe,poadj,epadj,wpadj,Scost,Pcost,Ecost,conSt,snap,PostSel,
-            msel,EpRestr,WpRestr,condk,PreSel);
+            msel,EpRestr,WpRestr,condk,PreSel,wpVsep);
 
         FREE_1ARRAY(RES); /* Free the RES array after printing is finished */
         /* Below increases the selection coefficients for the next loop */
