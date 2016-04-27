@@ -35,7 +35,7 @@ int main(void){
     Scost   = 0.0000; /* Cost of having tendancy to non-randomly select social mates      */
     Pcost   = 0.0000; /* Cost of having tendancy to engage in polyandry                   */
     Ecost   = 0.0000; /* Cost of having tendancy to non-randomly select extra-pair mates  */
-    gen     = 5000;    /* Number of generations per replicate (default 5000)              */
+    gen     = 500;   /* Number of generations per replicate (default 5000)               */
     muSt    = 0;      /* Generation at which mutations may start                          */
     mu      = 0.001;  /* Mutation rate of any given allele                                */
     Kind    = 1;      /* Kin recognition (1 = recognise all; 0 = recognise only siblings) */
@@ -67,7 +67,7 @@ int main(void){
     /* ===================================================================================*/
     rep        = 1;     /* Simulations run                                                */
     Pedi       = 0;     /* Print last rep's pedigree? (0:no, 1:yes) WARNING: 200Mb file   */
-    snap       = 0;     /* Last 2 gens pedigree for all reps printed? (0:no, 1:yes)       */
+    snap       = 1;     /* Last 2 gens pedigree for all reps printed? (0:no, 1:yes)       */
     msel       = 1;     /* Last 2 gens print mate selection of females? (0:no, 1:yes)     */
     /*                                                                                    */
     /* ===================================================================================*/

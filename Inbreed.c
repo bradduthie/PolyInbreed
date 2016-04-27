@@ -378,7 +378,7 @@ void Inbreed(int mc, int M, int Imm, int Clu, double *RES, double Beta1, int rep
         /* Rbuild makes a new R matrix for living  based on previous R */
         Rbuild(ID, Rmat, Rmof, Liv, OLiv);
 
-        if(snap == 1 && i == (gen - 1)){
+        if(snap == 2 && i == (gen - 1)){
             printMeanKinship(Rmof, ID, Liv, Active, Neutral, Neutstart, load, loadstart,
                 pid, Beta1, Pcost, WpRestr, EpRestr);
         } /* This prints out all kinship coefficients in the last generation */
@@ -629,8 +629,8 @@ void Inbreed(int mc, int M, int Imm, int Clu, double *RES, double Beta1, int rep
         /* Prints generation info in terminal    ====================*/
         /* ==========================================================*/
 
-        printf("%d\t%f\t%f\t%d\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n",pid,Beta1,Pcost,i,
-            RES[0],RES[1],RES[2],RES[3],RES[4],RES[5],RES[6]);
+        printf("%d\t%f\t%f\t%d\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n",pid,Beta1,
+            Pcost,i,RES[0],RES[1],RES[2],RES[3],RES[4],RES[5],RES[6],RES[7]);
 
         /* ==========================================================*/
         /* Move ahead to the next generation                         */
