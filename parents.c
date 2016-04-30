@@ -25,6 +25,9 @@ void parents(double **ID, double **OFF, double **Rmof, int *O, int Nloci, int In
     double *PrM, *PrT, *Mse;
     FILE *Pedigree, *Mates;
 
+    char matechar[20];  /* To print to the mate file */
+
+
     /*===========================================================================*/
     /* Social male in mating pool, need to select others?  ======================*/
     /*===========================================================================*/
@@ -226,7 +229,8 @@ void parents(double **ID, double **OFF, double **Rmof, int *O, int Nloci, int In
             } /* Now we also know which males can sire the offsring of i */
             extra++; /* Don't need a new set of males now */
             if(msel == 1 && gener == (lastgen - 1)){ /* If printing females mate choice */
-                Mates = fopen("mates.txt","a+"); /* Open the mates file */
+                sprintf(matechar,"mat%d.txt",pid);
+                Mates = fopen(matechar,"a+"); /* Open the mates file */
                 fprintf(Mates,"%d\t%f\t%f\t%f\t",pid,Beta1,Pcost,ID[h][0]);/*Print pid,mumID */
                 fprintf(Mates,"%f\t%d\t",gPy,nmale); /* Print off tendancy, nmales */
                 if(nmale == 1){ /* If she only selected one male */

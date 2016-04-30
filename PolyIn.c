@@ -26,16 +26,16 @@ int main(void){
     /* ===================================================================================*/
     /* Model parameter values                                                             */
     /* ===================================================================================*/
-    mc      = 1;      /* Number of females a male can mate with (as a social mate)        */
+    mc      = 100;    /* Number of females a male can mate with (as a social mate)        */
     M       = 0;      /* Maximum age (0 = non-overlapping gen; do not make >0 [ped error])*/
     Imm     = 5;      /* Number of immigrants per generation                              */
     Clu     = 8;      /* Clutch size for each female                                      */
     alpha   = 1.0;    /* Strength of inbreeding avoidance/preference                      */
-    Beta1   = 5.0000; /* Selection coefficient on deleterious recessives                  */
+    Beta1   = 0.0000; /* Selection coefficient on deleterious recessives                  */
     Scost   = 0.0000; /* Cost of having tendancy to non-randomly select social mates      */
     Pcost   = 0.0000; /* Cost of having tendancy to engage in polyandry                   */
     Ecost   = 0.0000; /* Cost of having tendancy to non-randomly select extra-pair mates  */
-    gen     = 500;   /* Number of generations per replicate (default 5000)               */
+    gen     = 5000;   /* Number of generations per replicate (default 5000)               */
     muSt    = 0;      /* Generation at which mutations may start                          */
     mu      = 0.001;  /* Mutation rate of any given allele                                */
     Kind    = 1;      /* Kin recognition (1 = recognise all; 0 = recognise only siblings) */

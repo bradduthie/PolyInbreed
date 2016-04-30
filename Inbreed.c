@@ -69,8 +69,10 @@ void Inbreed(int mc, int M, int Imm, int Clu, double *RES, double Beta1, int rep
     double mumu;       /* Mean mutational effect */
 
     char SnapPed[20];  /* Snapshot pedigree -- last generation recorded */
+    char evolres[20];  /* Evolution over multiple generations */
 
     FILE *fptr;        /* Snap shot pedigree file (see above) */
+    FILE *evol;        /* Evolution over multiple generations (see above) */
 
     /* =========================================================================*/
     /* =========================================================================*/
@@ -431,7 +433,7 @@ void Inbreed(int mc, int M, int Imm, int Clu, double *RES, double Beta1, int rep
         /* If last gen, prints last 2 gen pedigree to file           */
         /* ==========================================================*/        
         if(snap == 1 && i == (gen - 1)){
-            sprintf(SnapPed,"ped.txt");
+            sprintf(SnapPed,"ped%d.txt",pid);
             fptr = fopen(SnapPed,"a+");
             for(j=0; j<Liv; j++){ /* Printing relevant pedigree information */
                 if(ID[j][4]==0){ /* Only concerned with living individuals */
@@ -629,8 +631,11 @@ void Inbreed(int mc, int M, int Imm, int Clu, double *RES, double Beta1, int rep
         /* Prints generation info in terminal    ====================*/
         /* ==========================================================*/
 
-        printf("%d\t%f\t%f\t%d\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n",pid,Beta1,
+        sprintf(evolres,"evo%d.txt",pid);
+        evol = fopen(evolres,"a+");
+        fprintf(evol,"%d\t%f\t%f\t%d\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n",pid,Beta1,
             Pcost,i,RES[0],RES[1],RES[2],RES[3],RES[4],RES[5],RES[6],RES[7]);
+        fclose(evol);
 
         /* ==========================================================*/
         /* Move ahead to the next generation                         */
