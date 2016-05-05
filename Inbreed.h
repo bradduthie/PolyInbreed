@@ -25,4 +25,4 @@ void Inbreed(int mc, int M, int Imm, int Clu, double *RES, double Beta1, int rep
     int Kind, int xlen, int prP, double ImmSD, int wpe, int poe, int epe, 
     double poadj, double epadj, double wpadj, double Scost, double Pcost, 
     double Ecost, int conSt, int snap, int PostSel, int msel, int EpRestr, 
-    int WpRestr, int condk, int PreSel, int wpVsep);
+    int WpRestr, int condk, int PreSel, int wpVsep, int PreserC);

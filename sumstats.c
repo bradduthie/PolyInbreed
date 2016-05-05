@@ -14,8 +14,10 @@ void sumstats(double *RES, double **OFF, int M, int Nloci, int loadstart, int lo
     double **REGR, int generation, int prevOff){
 
     int i, j;    
-    double g, k, h, d, x, y, Ex, Ey, Exy, sumx;
+    double g, k, h, d, x, y, Ex, Ey, Exy, sumx, SSx, SSy, *ActTr, *NeuTr;
 
+    MAKE_1ARRAY(ActTr, l);
+    MAKE_1ARRAY(NeuTr, l);
     /* ==========================================================*/
     /* Calculate mean allele values     =========================*/
     /* ==========================================================*/        
@@ -32,25 +34,24 @@ void sumstats(double *RES, double **OFF, int M, int Nloci, int loadstart, int lo
                 x += OFF[i][((4*j)+11)];
             }
             g += x;
+            ActTr[i] = x;
             for(j=0; j<Neutral; j++){
                 y += OFF[i][((4*j)+Neutstart)];
                 y += OFF[i][((4*j)+Neutstart+1)];
             }
             h += y;
+            NeuTr[i] = y;
             for(j=0; j<load; j++){
                 d += OFF[i][((4*j)+loadstart)];
                 d += OFF[i][((4*j)+loadstart+1)];
             }
-            Ex  += x;
-            Ey  += y;
-            Exy += x*y;
             k += 2;
         }
     }
 
-    RES[0] = g / (Active * k);  /* Strategy allele frequency */
-    RES[1] = h / (Neutral * k); /* Neutral allele frequency */
-    RES[2] = d / (load * k);    /* Load allele frequency */
+    RES[0] = g / (Active * k);  /* Inbreeding allele frequency */
+    RES[1] = h / (Neutral * k); /* Polyandry allele frequency */
+    RES[2] = d / (load * k);    /* Neutral allele frequency */
 
     /* ==========================================================*/
     /* Calculate Standard deviation values  =====================*/
@@ -81,9 +82,9 @@ void sumstats(double *RES, double **OFF, int M, int Nloci, int loadstart, int lo
         }
     }
 
-    RES[3] = sqrt((1/(Active  * k)) * g);  /* Strategy allele stdev */
-    RES[4] = sqrt((1/(Neutral * k)) * h);  /* Neutral allele stdev */
-    RES[5] = sqrt((1/(load    * k)) * d);  /* Load allele stdev */
+    RES[3] = sqrt((1/(Active  * k)) * g);  /* Inbreeding allele stdev */
+    RES[4] = sqrt((1/(Neutral * k)) * h);  /* Polyandry allele stdev */
+    RES[5] = sqrt((1/(load    * k)) * d);  /* Neutral allele stdev */
 
     /* ==========================================================*/
     /* Regression coefficients -- juvenile survival =============*/
@@ -91,21 +92,36 @@ void sumstats(double *RES, double **OFF, int M, int Nloci, int loadstart, int lo
 
     if(generation > 0){
         sumx   = 0; /* Sum of inbreeding coefficients */
-
         for(i=0; i<prevOff; i++){
             sumx   += REGR[i][1]; /* Individual's f coefficient */
         }
-    
         RES[6]  = sumx / prevOff; /* Mean inbreeding coefficient */
-
     }
 
-    /* Calculates the covariance between pre-cop inbreeding and polyandry */
-    RES[7] = (Exy/(0.5*k)) - ( Ex/(0.5*k) * Ey/(0.5*k) ); /* Trait cov */
+    k = 0;
+    for(i=0; i<l; i++){
+        if(OFF[i][4] >= 0 && OFF[i][4] <= M){
+            Ex  += ActTr[i];
+            Ey  += NeuTr[i];
+            Exy += ActTr[i] * NeuTr[i];
+            k++;
+        }
+    }
+    Ex  = Ex / k;
+    Ey  = Ey / k;
+    Exy = Exy / k;
+
+    for(i=0; i<l; i++){
+        if(OFF[i][4] >= 0 && OFF[i][4] <= M){
+            SSx  += (ActTr[i]-Ex)*(ActTr[i]-Ex);
+            SSy  += (NeuTr[i]-Ey)*(NeuTr[i]-Ey);
+        }
+    }
+    FREE_1ARRAY(ActTr);
+    FREE_1ARRAY(NeuTr);
+
+    /* Calculates the correpation between pre-cop inbreeding and polyandry */
+    RES[7] = (Exy - Ex*Ey) / ( sqrt(SSx/k) * sqrt(SSy/k) );
 }
-
-
-
-
 
 

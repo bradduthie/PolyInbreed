@@ -25,6 +25,7 @@
 #include "deadbottom.h"
 #include "sumstats.h"
 #include "inbrdep.h"
+#include "SampleNoReplace.h"
 
 #define CORES 1 /* For running in parallel, set cores > 1 */
 #define length(x) (sizeof (x) / sizeof *(x))
@@ -34,7 +35,7 @@ void Inbreed(int mc, int M, int Imm, int Clu, double *RES, double Beta1, int rep
     int Kind, int xlen, int prP, double ImmSD, int wpe, int poe, int epe, 
     double poadj, double epadj, double wpadj, double Scost, double Pcost, 
     double Ecost, int conSt, int snap, int PostSel, int msel, int EpRestr, 
-    int WpRestr, int condk, int PreSel, int wpVsep){
+    int WpRestr, int condk, int PreSel, int wpVsep, int PreserC){
 
     /* =========================================================================*/
     /* =========================================================================*/
@@ -50,6 +51,7 @@ void Inbreed(int mc, int M, int Imm, int Clu, double *RES, double Beta1, int rep
     int *O;            /* Keeps track of offspring per nest in a generation */
     int loadstart;     /* where inbreeding load loci start on table */
     int Neutstart;     /* Where do the neutral's start on the table */
+    int *shuffImm;     /* Shuffle vector for immigrants */
 
     double a;          /* Scalar place for alleles that can mutate */
     double a1[2];      /* Vector used to transition making alleles */
@@ -67,6 +69,7 @@ void Inbreed(int mc, int M, int Imm, int Clu, double *RES, double Beta1, int rep
     double **REGR;     /* An array to hold values for regression calcs */
     double musd;       /* Standard deviation in mutational effects */
     double mumu;       /* Mean mutational effect */
+    double *rImm;      /* Random value for an immigrant */
 
     char SnapPed[20];  /* Snapshot pedigree -- last generation recorded */
     char evolres[20];  /* Evolution over multiple generations */
@@ -575,26 +578,64 @@ void Inbreed(int mc, int M, int Imm, int Clu, double *RES, double Beta1, int rep
             PIV[j][7] = 0;   /* Coefficient of inbreeding (F) */
             PIV[j][8] = -1;  /* Mate selection */
             PIV[j][9] = -1;  /* Neigher WP or EP offspring */
-            for(g=0; g<Nloci; g++){ /* Maintains allele freqs */
-                /* If past the generation of mutation, let */
-                if(g < Active){ /* If it's the allele affecting social mate choice */
-                    a1[0] = randnorm(RES[0],ImmSD*RES[3]);
-                    a1[1] = randnorm(RES[0],ImmSD*RES[3]);
-                } /* If allele affecting degree of polyandry */
-                if(g >= Active && g < (Active+Neutral)){
-                    a1[0] = randnorm(RES[1],ImmSD*RES[4]);
-                    a1[1] = randnorm(RES[1],ImmSD*RES[4]);
-                } /* If allele affecting extra pair mate choice */
-                if(g >= (Active+Neutral)){
-                    a1[0] = randnorm(RES[2],ImmSD*RES[5]);
-                    a1[1] = randnorm(RES[2],ImmSD*RES[5]);
+            if(PreserC == 0){
+                for(g=0; g<Nloci; g++){ /* Maintains allele freqs */
+                    /* If past the generation of mutation, let */
+                    if(g < Active){ /* If it's the allele affecting social mate choice */
+                        a1[0] = randnorm(RES[0],ImmSD*RES[3]);
+                        a1[1] = randnorm(RES[0],ImmSD*RES[3]);
+                    } /* If allele affecting degree of polyandry */
+                    if(g >= Active && g < (Active+Neutral)){
+                        a1[0] = randnorm(RES[1],ImmSD*RES[4]);
+                        a1[1] = randnorm(RES[1],ImmSD*RES[4]);
+                    } /* If allele affecting extra pair mate choice */
+                    if(g >= (Active+Neutral)){
+                        a1[0] = randnorm(RES[2],ImmSD*RES[5]);
+                        a1[1] = randnorm(RES[2],ImmSD*RES[5]);
+                    }
+                    PIV[j][((4*g)+10)] = a1[0]; /* Adds the allele to PIV */
+                    PIV[j][((4*g)+11)] = a1[1]; /* Adds the allele to PIV */
                 }
-                PIV[j][((4*g)+10)] = a1[0]; /* Adds the allele to PIV */
-                PIV[j][((4*g)+11)] = a1[1]; /* Adds the allele to PIV */
-            }
+            }else{ /* This begins what happens when we preserve correlated traits in */
+                if(Neutral != Active){ /* immigrants coming into the population */
+                    printf("ERROR: NEUTRAL & ACTIVE *REALLY* SHOULD BE EQUAL IF PreserC");
+                } /* What we're doing here is making a lot of random uniforms in advance */
+                MAKE_1ARRAY(rImm, cols);
+                for(g=0; g<cols; g++){
+                    rImm[g] = randnorm(0,ImmSD);
+                } /* A shuffling needs to occur to prevent *loci* from being correlated */
+                MAKE_1ARRAY(shuffImm, Active); /* The end is that traits are correlated */
+                g = 0; /* As they are in the native population, but the shuffle makes */
+                while(g < Active){ /* individual loci independent (e.g., L1 for */
+                    shuffImm[g] = g;  /* inbreeding and L1 for polyandry ) */
+                    g++; /* This has been double-checked to confirm the pattern of */
+                } /* output is as desired -- sd within loci, and cor among traits */
+                shufflesamp(shuffImm, Active);
+                for(g=0; g<Nloci; g++){ /* Maintains allele freqs */
+                    /* If past the generation of mutation, let */
+                    if(g < Active){ /* If it's the allele affecting social mate choice */
+                        a1[0] = rImm[(4*shuffImm[g])+10] * RES[3] + RES[0];
+                        a1[1] = rImm[(4*shuffImm[g])+11] * RES[3] + RES[0];
+                    } /* Below is icky, but it works (confirmed statistically in R) */
+                    if(g >= Active && g < (Active+Neutral)){
+                        a1[0]   = sqrt(1-RES[7]*RES[7])*RES[4] * rImm[(4*g)+10] +
+                                      RES[7]*RES[4]*rImm[(4*g)-(4*Active)+10] + RES[1];
+                        a1[1]   = sqrt(1-RES[7]*RES[7])*RES[4] * rImm[(4*g)+11] +
+                                      RES[7]*RES[4]*rImm[(4*g)-(4*Active)+11] + RES[1];
+                    } /* If allele affecting extra pair mate choice */
+                    if(g >= (Active+Neutral)){
+                        a1[0] = rImm[(4*g)+10]  * RES[5] + RES[2];
+                        a1[1] = rImm[(4*g)+11]  * RES[5] + RES[2];
+                    }
+                    PIV[j][((4*g)+10)] = a1[0]; /* Adds the allele to PIV */
+                    PIV[j][((4*g)+11)] = a1[1]; /* Adds the allele to PIV */
+                }
+                FREE_1ARRAY(shuffImm);
+                FREE_1ARRAY(rImm);
+            } /* Finished what happens if immigrants have correlated traits. */
             Ind++; /* Move on to the next individual number */
         }
-
+ 
         /* ==========================================================*/
         /* Remake the matrix ID =====================================*/
         /* ==========================================================*/        

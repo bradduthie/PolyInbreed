@@ -16,8 +16,9 @@
 
 int main(void){
 
-    int    mc, M, Imm, Clu, rep, i, j, xlen, Pedi, prP, conSt, snap, msel, condk, wpVsep;
+    int    mc, M, Imm, Clu, rep, i, j, xlen, Pedi, prP, conSt, snap, msel, condk;
     int    Active, Neutral, load, gen, muSt, Kind, EpRestr, WpRestr, PreSel, PostSel;
+    int    PreserC, wpVsep;
     double Beta1, alpha, mu, *RES, ImmSD, poadj, epadj, wpadj, Scost, Pcost, Ecost;
     double poe, wpe, epe;
 
@@ -48,7 +49,7 @@ int main(void){
     WpRestr = 0;      /* Restrict mate access for WP mates? (0: no, >0: Restriction #     */
     PreSel  = 1;      /* Allow pre-copulatory mate selection for EPMs (0: no, 1:yes)      */
     PostSel = 0;      /* Allow post-copulatory mate selection for EPMs (0: no, 1: yes)    */
-    /*                                                                                    */
+    PreserC = 1;      /* Preserve among-individual trait correlations in immigrants       */
     /* ===================================================================================*/
     /* Genome attributes of individuals                                                   */
     /* ===================================================================================*/
@@ -65,7 +66,7 @@ int main(void){
     /* ===================================================================================*/
     /* Simulation details                                                                 */
     /* ===================================================================================*/
-    rep        = 1;     /* Simulations run                                                */
+    rep        = 1;    /* Simulations run                                                */
     Pedi       = 0;     /* Print last rep's pedigree? (0:no, 1:yes) WARNING: 200Mb file   */
     snap       = 1;     /* Last 2 gens pedigree for all reps printed? (0:no, 1:yes)       */
     msel       = 1;     /* Last 2 gens print mate selection of females? (0:no, 1:yes)     */
@@ -81,7 +82,6 @@ int main(void){
         if(i == rep-1 && Pedi == 1){ /* If it's the last rep, and should print pedigree */
             prP = 1;                 /* Switch this variable so pedigree will print */
         }
-
         MAKE_1ARRAY(RES,11); /* The RES array holds summary statistics */
         for(j=0; j<11; j++){ /* Need to refresh RES with zeros for each simulation */
             RES[j] = 0.0;
@@ -89,7 +89,7 @@ int main(void){
         /* The function below is the main simulation function from Inbreed.c */
         Inbreed(mc,M,Imm,Clu,RES,Beta1,i,Active,Neutral,load,alpha,gen,muSt,mu,Kind,xlen,
             prP,ImmSD,wpe,poe,epe,poadj,epadj,wpadj,Scost,Pcost,Ecost,conSt,snap,PostSel,
-            msel,EpRestr,WpRestr,condk,PreSel,wpVsep);
+            msel,EpRestr,WpRestr,condk,PreSel,wpVsep,PreserC);
 
         FREE_1ARRAY(RES); /* Free the RES array after printing is finished */
         /* Below increases the selection coefficients for the next loop */

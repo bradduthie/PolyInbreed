@@ -1,8 +1,8 @@
-CXX    = icc
+CXX    = gcc
 CFLAGS = -fopenmp -ansi -Wall -pedantic -std=c99
 
-RunInbr:	PolyIn.o Inbreed.o retain.o mortality.o parents.o babies.o mateselect.o 		deadbottom.o Rbuild.o vectorrank.o arraysort2D.o landscape.o randnormINT.o sumstats.o randpois.o randnorm.o randunif.o FFT.o as183.o inbrdep.o
-	$(CC) $(CFLAGS) -o PolyIn PolyIn.o Inbreed.o retain.o mortality.o parents.o 			babies.o mateselect.o deadbottom.o Rbuild.o vectorrank.o arraysort2D.o landscape.o randnormINT.o sumstats.o randpois.o randnorm.o randunif.o FFT.o as183.o inbrdep.o -lm
+RunInbr:	PolyIn.o Inbreed.o retain.o mortality.o parents.o babies.o mateselect.o 		deadbottom.o Rbuild.o vectorrank.o arraysort2D.o landscape.o randnormINT.o SampleNoReplace.o sumstats.o randpois.o randnorm.o randunif.o FFT.o as183.o inbrdep.o
+	$(CC) $(CFLAGS) -o PolyIn PolyIn.o Inbreed.o retain.o mortality.o parents.o 			babies.o mateselect.o deadbottom.o Rbuild.o vectorrank.o arraysort2D.o landscape.o randnormINT.o sumstats.o SampleNoReplace.o randpois.o randnorm.o randunif.o FFT.o as183.o inbrdep.o -lm
 
 PolyIn.o: PolyIn.c
 	$(CC) $(CFLAGS) -c PolyIn.c
@@ -45,6 +45,9 @@ randnormINT.o: randnormINT.c
 
 sumstats.o: sumstats.c
 	$(CC) $(CFLAGS) -c sumstats.c
+
+SampleNoReplace.o: SampleNoReplace.c
+	$(CC) $(CFLAGS) -c SampleNoReplace.c
 
 randpois.o: randpois.c
 	$(CC) $(CFLAGS) -c randpois.c
