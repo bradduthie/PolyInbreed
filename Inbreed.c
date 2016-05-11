@@ -44,7 +44,7 @@ void Inbreed(int mc, int M, int Imm, int Clu, double *RES, double Beta1, int rep
     /* =========================================================================*/
 
     int i, j, k, l, h, g; 
-    int Ind, suc, Liv, OLiv, cols, prevOff, removed, pid;
+    int Ind, suc, Liv, OLiv, cols, prevOff, removed, pid, pidadd, pidcmb;
     int Nloci;         /* The number of loci in simulated genome */
     int TotAlleles;    /* Keep track of total alleles in sim */
     int StInds;        /* The initial number of females and males */
@@ -83,9 +83,17 @@ void Inbreed(int mc, int M, int Imm, int Clu, double *RES, double Beta1, int rep
     /* =========================================================================*/
     /* =========================================================================*/
 
-	pid = getpid(); /* Print out the unique number (for parallel) */
+	pid    = getpid(); /* Print out the unique number (for parallel) */
 
-    Nloci = Active + Neutral + load; /* Set the number of loci */
+    pidadd = floor(randunif()*100000); /* A bit of insurance for printing file */
+
+    i = 1; /* This just makes a combined number for file output on the cluster */
+    while (i <= pidadd){ /* So if running a bunch in parallel, it will be even */
+      i *= 10; /* less likely that two file names will print out the same */
+    } /* (this would require the process and random number to be identical) */
+    pidcmb = pid*i + pidadd; 
+
+    Nloci  = Active + Neutral + load; /* Set the number of loci */
 
     StInds = 100;   /* Starting number of females and males */
     Ind    = 0;     /* Running count of the number of individuals */
@@ -385,7 +393,7 @@ void Inbreed(int mc, int M, int Imm, int Clu, double *RES, double Beta1, int rep
 
         if(snap == 2 && i == (gen - 1)){
             printMeanKinship(Rmof, ID, Liv, Active, Neutral, Neutstart, load, loadstart,
-                pid, Beta1, Pcost, WpRestr, EpRestr);
+                pidcmb, Beta1, Pcost, WpRestr, EpRestr);
         } /* This prints out all kinship coefficients in the last generation */
 
         /* ==========================================================*/
@@ -429,18 +437,18 @@ void Inbreed(int mc, int M, int Imm, int Clu, double *RES, double Beta1, int rep
 
         parents(ID,OFF,Rmof,O,Nloci,Ind,k,l,Clu,Liv,i,Beta1,alpha,RES,rep,loadstart,
             load,Active,prP,Neutstart,Neutral,Kind,M,poe,epe,poadj,epadj,mu,mumu,
-            musd,conSt,PostSel,pid,msel,gen,EpRestr,Pcost,condk,PreSel,wpVsep);
+            musd,conSt,PostSel,pidcmb,msel,gen,EpRestr,Pcost,condk,PreSel,wpVsep);
         Ind += l; /*Needed because the Ind++ in parents wont link here */
 
         /* ==========================================================*/
         /* If last gen, prints last 2 gen pedigree to file           */
         /* ==========================================================*/        
         if(snap == 1 && i == (gen - 1)){
-            sprintf(SnapPed,"ped%d.txt",pid);
+            sprintf(SnapPed,"ped%d.txt",pidcmb);
             fptr = fopen(SnapPed,"a+");
             for(j=0; j<Liv; j++){ /* Printing relevant pedigree information */
                 if(ID[j][4]==0){ /* Only concerned with living individuals */
-                    fprintf(fptr,"%d\t%f\t%f\t%f\t",pid,ID[j][0],ID[j][1],ID[j][4]+1);
+                    fprintf(fptr,"%d\t%f\t%f\t%f\t",pidcmb,ID[j][0],ID[j][1],ID[j][4]+1);
                     fprintf(fptr,"%f\t%f\t%f\t%f\t",ID[j][5],ID[j][6],ID[j][7],ID[j][8]);
                     fprintf(fptr,"%f\t"            ,ID[j][9]);
                     a = 0.0; /* Just to add up the WP values, not ind alleles */
@@ -464,7 +472,7 @@ void Inbreed(int mc, int M, int Imm, int Clu, double *RES, double Beta1, int rep
                 }
             }
             for(j=0; j<l; j++){ /* Only concerned here with fresh offspring */
-                fprintf(fptr,"%d\t%f\t%f\t%f\t",pid,OFF[j][0],OFF[j][1],OFF[j][4]);
+                fprintf(fptr,"%d\t%f\t%f\t%f\t",pidcmb,OFF[j][0],OFF[j][1],OFF[j][4]);
                 fprintf(fptr,"%f\t%f\t%f\t%f\t",OFF[j][5],OFF[j][6],OFF[j][7],OFF[j][8]);
                 fprintf(fptr,"%f\t"            ,OFF[j][9]);
                 a = 0.0; /* Just to add up the WP values, not ind alleles */
@@ -672,10 +680,10 @@ void Inbreed(int mc, int M, int Imm, int Clu, double *RES, double Beta1, int rep
         /* Prints generation info in terminal    ====================*/
         /* ==========================================================*/
 
-        sprintf(evolres,"evo%d.txt",pid);
+        sprintf(evolres,"evo%d.txt",pidcmb);
         evol = fopen(evolres,"a+");
-        fprintf(evol,"%d\t%f\t%f\t%d\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n",pid,Beta1,
-            Pcost,i,RES[0],RES[1],RES[2],RES[3],RES[4],RES[5],RES[6],RES[7]);
+        fprintf(evol,"%d\t%f\t%f\t%d\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n",pidcmb,
+            Beta1,Pcost,i,RES[0],RES[1],RES[2],RES[3],RES[4],RES[5],RES[6],RES[7]);
         fclose(evol);
 
         /* ==========================================================*/
