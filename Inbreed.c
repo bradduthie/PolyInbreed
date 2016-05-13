@@ -85,11 +85,11 @@ void Inbreed(int mc, int M, int Imm, int Clu, double *RES, double Beta1, int rep
 
 	pid    = getpid(); /* Print out the unique number (for parallel) */
 
-    pidadd = floor(randunif()*100000); /* A bit of insurance for printing file */
+    pidadd = floor(randunif()*10000); /* A bit of insurance for printing file */
 
     i = 1; /* This just makes a combined number for file output on the cluster */
     while (i <= pidadd){ /* So if running a bunch in parallel, it will be even */
-      i *= 10; /* less likely that two file names will print out the same */
+        i *= 10; /* less likely that two file names will print out the same */
     } /* (this would require the process and random number to be identical) */
     pidcmb = pid*i + pidadd; 
 
@@ -586,7 +586,7 @@ void Inbreed(int mc, int M, int Imm, int Clu, double *RES, double Beta1, int rep
             PIV[j][7] = 0;   /* Coefficient of inbreeding (F) */
             PIV[j][8] = -1;  /* Mate selection */
             PIV[j][9] = -1;  /* Neigher WP or EP offspring */
-            if(PreserC == 0){
+            if(PreserC == 0 || i<1){
                 for(g=0; g<Nloci; g++){ /* Maintains allele freqs */
                     /* If past the generation of mutation, let */
                     if(g < Active){ /* If it's the allele affecting social mate choice */
