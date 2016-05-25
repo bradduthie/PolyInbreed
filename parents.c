@@ -20,8 +20,8 @@ void parents(double **ID, double **OFF, double **Rmof, int *O, int Nloci, int In
     int lastgen, int EpRestr, double Pcost, int condk, int PreSel, int wpVsep){
 
     int i, j, g, h, m, s, MomP, DadP, extra, nmale, ch, PrCount, ccc, socmat;
-    int *MALES;
-    double pscore, nscore, mscore, gPy, r, PrS, PrR, PrC, new, a, ksoc;
+    int *MALES, rejectm;
+    double pscore, nscore, mscore, gPy, r, PrS, PrR, PrC, new, a, prsoc;
     double *PrM, *PrT, *Mse;
     FILE *Pedigree, *Mates;
 
@@ -50,24 +50,10 @@ void parents(double **ID, double **OFF, double **Rmof, int *O, int Nloci, int In
                 }
             }
             gPy += poadj; /* Adjusts polyandry externally (in PolyIn.c) */
-            if(condk == 1){ /* If prob of polyandry is conditional upon k */
-                socmat = ID[h][8]+1;
-                ksoc   = Rmof[h][socmat]; /* Get the k of the initial mate mate */
-                new = 0; /* This and below just checks if avoiding (<0) or prefering (>0) */
-                for(g=0; g<Active; g++){ /* Strategy alleles affect quality */
-                    new += ID[h][(4*g)+10]*epe + epadj; 
-                    new += ID[h][(4*g)+11]*epe + epadj; 
-                } /* Now if preferring & cond == 1, adjust condition for polyandry */
-                if(new > 0){ /* If preferring, want females to engange in polyandry */
-                    ksoc = 1 - ksoc; /* when mate is more distant relative */
-                } /* So subtract here so that high kinship between mates reduces polyandry */
-            }else{
-                ksoc = 1.0;
-            }
             if(gPy < 0){ /* Lambda value has to be zero or positive */
                 gPy = 0.0;
             }
-            nmale = 1 + randpois(gPy*ksoc); /* So we need an array with each male */
+            nmale = 1 + randpois(gPy); /* So we need an array with each male */
             if(nmale > k){ /* If females more polyandrous than there are males */
                 nmale = k; /* Cap the polyandry at the number of paired males */
             } /* Now males cannot be selected additionally as extra-pair mates */
@@ -130,6 +116,10 @@ void parents(double **ID, double **OFF, double **Rmof, int *O, int Nloci, int In
                         } /* Quality now increased (new) or decreased (1/new) with kinship */
                     } /* Like in mateselect, now move to actual selection from prob */
                 } /* Below: If not using a subset, but want to restrict access to males */
+                if(condk == 1 && PreSel == 1){
+                    socmat  = ID[h][8];    /* Get the Pr of the initial mate mate */
+                    prsoc   = PrM[socmat]; /* Before potentially knocking out below */
+                }
                 if(EpRestr > 0){  /* Choice will be within restriction */
                     ccc     = 100000; /* Just make sure there's no infinite loop */
                     PrCount = 0; /* This will count possible mates (to be restricted) */
@@ -151,30 +141,47 @@ void parents(double **ID, double **OFF, double **Rmof, int *O, int Nloci, int In
                         } /* behaving ridiculously */
                     } /* Males with the possibility of being chosen, comprising a restricted */
                 } /* Subset that will be used for females to sample from */
+                /* Now if conditional dependence, check if at least one EPM is better */
+                rejectm = 0; /* Never reject unless conditional dependence (below) */
+                if(condk == 1 && PreSel == 1){
+                    rejectm = 1; /* Start assuming that social mate is best of subset */
+                    for(j=0; j<Liv; j++){
+                        if(PrM[j] > prsoc){
+                            rejectm = 0; /* If we find a better male in the subset */
+                        } /* No longer reject all males outright given cond dependence */
+                    }
+                } /* Now know if we're rejecting full subset in favour of only soc male */
                 MALES[0] = ID[h][8]; /* Social mate gets the first position */
                 g        = ID[h][8]; /* g assigned as integer for line below */ 
                 PrM[g]   = 0;        /* Social mate cannot take another position */
                 for(j=1; j<nmale; j++){ /* Every other position (below) is EPMs */
-                    PrS = 0; /* Sum of the prob vector for choosing */
-                    for(g=0; g<Liv; g++){
-                        PrS += PrM[g];
-                    } /* PrS now can be thought of as `total quality' */
-                    if(PrS > 0){ /* If some probability of getting mate */
-                        PrR = 0; /* Running sum of probability vect */
-                        for(g=0; g<Liv; g++){
-                            PrT[g] = (PrM[g] / PrS) + PrR;
-                            PrR = PrT[g];
-                        } /* PrT now increasing vector, elements 0-1 */
-                        PrC = randunif(); /* Vector prob select*/
-                        g = 0; /* j increases to find position selected */
-                        while(PrT[g] < PrC){
-                            g++; /* Stops when random PrC pos found */
-                        }
-                        MALES[j] = g; /* The choice of individual is now g */
-                        PrM[g]   = 0; /* g cannot be selected again */
-                    }else{
-                        MALES[j] = ID[h][8]; /* Not enough EPM? */
-                    } /* Should never happen, but default to social pair */
+                    switch(rejectm){
+                        case 1:
+                            MALES[j] = ID[h][8]; /* Must be social male */
+                            break;
+                        default:
+                            PrS = 0; /* Sum of the prob vector for choosing */
+                            for(g=0; g<Liv; g++){
+                                PrS += PrM[g];
+                            } /* PrS now can be thought of as `total quality' */
+                            if(PrS > 0){ /* If some Pr getting mate */
+                                PrR = 0; /* Running sum of probability vect */
+                                for(g=0; g<Liv; g++){
+                                    PrT[g] = (PrM[g] / PrS) + PrR;
+                                    PrR = PrT[g];
+                                } /* PrT now increasing vector, elements 0-1 */
+                                PrC = randunif(); /* Vector prob select*/
+                                g = 0; /* j increases to find position selected */
+                                while(PrT[g] < PrC){
+                                     g++; /* Stops when random PrC pos found */
+                                }
+                                MALES[j] = g; /* The choice of individual is now g */
+                                PrM[g]   = 0; /* g cannot be selected again */
+                            }else{
+                                MALES[j] = ID[h][8]; /* Not enough EPM? */
+                            } /* Should never happen, but set to social pair */
+                            break;
+                    }
                 } /* Note, males cannot be exhausted. If alive, they're fair game */
                 /* ----- Now we have a vector of wpm and epms -----------------  */
                 FREE_1ARRAY(PrM); /* Note: If EpAvail > 0, MALES is a random subset */

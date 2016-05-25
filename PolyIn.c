@@ -44,7 +44,7 @@ int main(void){
     ImmSD   = 1.0;    /* SD around the mean for immigrant allelic values                  */
     conSt   = 1;      /* Constrain WP & EP avoidance/preference to be equal? (0:no, 1:yes)*/
     wpVsep  = 0;      /* 0: wpe is soc, epe is poly mates | 1: wpe is pre, epe is postcop */ 
-    condk   = 0;      /* Is gPy scaled by the kinship of the initial mate (1:yes)         */
+    condk   = 0;      /* Will females reject EPMs if none better than soc? (1:yes)        */
     EpRestr = 0;      /* Restrict additional mate acces? (0: no, >0: Restriction number   */
     WpRestr = 0;      /* Restrict mate access for WP mates? (0: no, >0: Restriction #     */
     PreSel  = 1;      /* Allow pre-copulatory mate selection for EPMs (0: no, 1:yes)      */
@@ -66,7 +66,7 @@ int main(void){
     /* ===================================================================================*/
     /* Simulation details                                                                 */
     /* ===================================================================================*/
-    rep        = 1;    /* Simulations run                                                */
+    rep        = 1;     /* Simulations run                                                */
     Pedi       = 0;     /* Print last rep's pedigree? (0:no, 1:yes) WARNING: 200Mb file   */
     snap       = 1;     /* Last 2 gens pedigree for all reps printed? (0:no, 1:yes)       */
     msel       = 1;     /* Last 2 gens print mate selection of females? (0:no, 1:yes)     */
